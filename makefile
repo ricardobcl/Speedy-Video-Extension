@@ -40,7 +40,8 @@ install: chrome
 
 chrome: clean_chrome
 	@ echo "> Building the Chrome extension folder..."
-	@ cp -R icons "$(CHROME)/icons"
+	@ mkdir -p "$(CHROME)/icons"
+	@ cp icons/*.png "$(CHROME)/icons"
 	@ cp src/speedy.js src/style.css "$(CHROME)"
 	@ echo "$(GREEN)Chrome extension is ready!$(PLAIN)"
 

@@ -1,0 +1,23 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ag" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFA425"/><stop offset=".55" stop-color="#FF5A36"/><stop offset="1" stop-color="#FF2D78"/>
+    </linearGradient>
+    <radialGradient id="ah" cx=".25" cy=".2" r=".8">
+      <stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="as" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#7A0B33" flood-opacity=".45"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#ag)"/>
+  <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#ah)"/>
+  <g stroke="#fff" stroke-linecap="round" stroke-width="12">
+    <line x1="26" y1="96" x2="46" y2="96" opacity=".65"/>
+    <line x1="20" y1="128" x2="44" y2="128" opacity=".45"/>
+    <line x1="26" y1="160" x2="46" y2="160" opacity=".3"/>
+  </g>
+  <g filter="url(#as)"><path d="M 59 84 L 119 128 L 59 172 Z"
+   fill="#fff" stroke="#fff" stroke-width="12" stroke-linejoin="round" /><path d="M 137 84 L 197 128 L 137 172 Z"
+   fill="#fff" stroke="#fff" stroke-width="12" stroke-linejoin="round" /></g>
+  </svg>
