@@ -25,8 +25,7 @@ const config = {
   overlayKey: "z", // key that shows the current speed on top of the video
   overlayDuration: 1000, // ms the speed overlay stays visible
   applyInterval: 1000, // ms between checks that the playing video has the chosen speed
-  pollInterval: 250, // ms between attempts to find a video after a page change
-  maxTriesVideo: 150, // max number of attempts to find a video
+  pollInterval: 250, // ms between checks for a URL change, without the Navigation API
   debug: false // enables console.log debug info
 }
 
@@ -56,24 +55,34 @@ const area = element => {
   return rect.width * rect.height
 }
 
-// all <video> elements, including those inside (open) shadow roots, where
-// some players keep them (e.g. web-component players such as mux-player)
-const allVideos = (root = document) => {
-  const videos = [...root.querySelectorAll("video")]
+// <video> elements inside (open) shadow roots, where some players keep them
+// (e.g. web-component players such as mux-player). Reaching them means walking
+// every element on the page looking for shadow roots, which is why this is a
+// fallback and not how we look first.
+const shadowVideos = (root = document) => {
+  const videos = []
   for (const element of root.querySelectorAll("*")) {
-    if (element.shadowRoot) videos.push(...allVideos(element.shadowRoot))
+    const shadow = element.shadowRoot
+    if (shadow) videos.push(...shadow.querySelectorAll("video"), ...shadowVideos(shadow))
   }
   return videos
 }
 
+// the ones on screen, largest first; hidden videos don't count
+const visibleVideos = videos =>
+  videos.filter(video => area(video) > 0).sort((a, b) => area(b) - area(a))
+
 // The video to control: the largest one playing, else the largest one on
-// screen; hidden videos don't count. Sites keep hidden or paused players
-// around (youtube keeps its regular player on shorts pages) and feeds and
-// stories show several videos in turn, so this is decided again every time it
-// matters.
+// screen. Sites keep hidden or paused players around (youtube keeps its
+// regular player on shorts pages) and feeds and stories show several videos in
+// turn, so this is decided again every time it matters -- often enough that it
+// is worth looking in the light DOM, which is a cheap query and where almost
+// every player keeps its video, and only walking the page for shadow roots
+// when that comes up empty.
 const findVideo = () => {
-  const visible = allVideos().filter(video => area(video) > 0).sort((a, b) => area(b) - area(a))
-  return visible.find(video => !video.paused) ?? visible[0]
+  const visible = visibleVideos([...document.querySelectorAll("video")])
+  const candidates = visible.length > 0 ? visible : visibleVideos(shadowVideos())
+  return candidates.find(video => !video.paused) ?? candidates[0]
 }
 
 // -------------------------------------------------------------- the extension
@@ -85,13 +94,13 @@ class SpeedyVideo {
   #currentUrl = location.href
   #timers = new Map() // active setInterval handles, keyed by name
   #overlayTimeout = undefined
-  #shortcutsActive = false
 
   start() {
     log("Starting Speedy Video")
     this.#watchUrlChanges()
     this.#watchPlayback()
-    this.#findVideo()
+    this.#setupShortcuts()
+    this.#keepSpeedApplied() // in case a video is already playing
   }
 
   // sets a new playback speed, clamped to [minSpeed, maxSpeed] and rounded to
@@ -99,7 +108,7 @@ class SpeedyVideo {
   setSpeed(speed) {
     this.speed = Math.round(clamp(speed, config.minSpeed, config.maxSpeed) * 100) / 100
     log(`Speed set to ${this.speed}`)
-    this.applySpeed()
+    this.#keepSpeedApplied() // applies it now and keeps it applied from here on
     this.showOverlay()
   }
 
@@ -147,7 +156,7 @@ class SpeedyVideo {
     )
   }
 
-  // ---------------------------------------------------- finding what to drive
+  // ------------------------------------------------ keeping the speed applied
 
   // single-page sites (e.g. youtube) load a new video without a page load, so
   // look again for the video whenever the URL changes
@@ -156,7 +165,7 @@ class SpeedyVideo {
       if (location.href === this.#currentUrl) return
       log(`URL changed to ${location.href}`)
       this.#currentUrl = location.href
-      this.#findVideo()
+      this.#keepSpeedApplied()
     }
     if (window.navigation) {
       window.navigation.addEventListener("currententrychange", onChange)
@@ -165,25 +174,22 @@ class SpeedyVideo {
     }
   }
 
-  #findVideo() {
-    this.#poll("video", config.maxTriesVideo, () => this.#setup())
-  }
-
   // some sites have no video until one is opened, long after the page loaded
   // and without a URL change (e.g. whatsapp, where videos play in a viewer),
   // so a video starting to play is the other cue to set up; `play` does not
   // bubble, but the capture phase still sees it here
   #watchPlayback() {
-    document.addEventListener("play", () => this.#setup(), true)
+    document.addEventListener("play", () => this.#keepSpeedApplied(), true)
   }
 
-  // returns true when a video was found and everything is set up; running it
-  // again (e.g. when another video starts playing) is harmless
-  #setup() {
+  // Keeps the chosen speed applied to whatever is playing. Nothing needs
+  // keeping until a video plays or a speed is chosen, so those two moments are
+  // what call this, rather than the page being polled for a video. Running it
+  // again (e.g. when another video starts playing) is harmless; it returns
+  // true when there was a video to apply the speed to.
+  #keepSpeedApplied() {
     if (!findVideo()) return false
-    log("We found a video tag!")
-    this.#stopTimer("video")
-    this.#setupShortcuts()
+    log(`Keeping ${this.speed}x applied`)
     this.#startTimer("applySpeed", this.applySpeed, config.applyInterval)
     this.applySpeed() // right away, so a new video does not start at 1x
     return true
@@ -191,10 +197,8 @@ class SpeedyVideo {
 
   // ---------------------------------------------------------------- shortcuts
 
+  // capture phase, so that we run before the site's own handlers
   #setupShortcuts() {
-    if (this.#shortcutsActive) return
-    this.#shortcutsActive = true
-    // capture phase, so that we run before the site's own handlers
     document.addEventListener("keydown", this.#onKeydown, true)
   }
 
@@ -240,31 +244,6 @@ class SpeedyVideo {
   }
 
   // ------------------------------------------------------------------- timers
-
-  // calls `fn` now and then every `pollInterval` ms until it returns true or
-  // `maxTries` is reached; restarting a poll cancels the previous one first,
-  // so polls never leak
-  #poll(name, maxTries, fn) {
-    this.#stopTimer(name)
-    let tries = 0
-    const tick = () => {
-      tries += 1
-      if (fn()) {
-        this.#stopTimer(name)
-        return true
-      }
-      if (tries >= maxTries) {
-        log(`${name}: giving up after ${tries} tries`)
-        this.#stopTimer(name)
-        return true
-      }
-      log(`${name}: try #${tries}`)
-      return false
-    }
-    if (!tick()) {
-      this.#timers.set(name, setInterval(tick, config.pollInterval))
-    }
-  }
 
   #startTimer(name, fn, ms) {
     this.#stopTimer(name)

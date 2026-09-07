@@ -186,8 +186,7 @@ const config = {
   overlayKey: "z", // key that shows the current speed on top of the video
   overlayDuration: 1000, // ms the speed overlay stays visible
   applyInterval: 1000, // ms between checks that the playing video has the chosen speed
-  pollInterval: 250, // ms between attempts to find a video after a page change
-  maxTriesVideo: 150, // max number of attempts to find a video
+  pollInterval: 250, // ms between checks for a URL change, without the Navigation API
   debug: false // enables console.log debug info
 }
 ```
