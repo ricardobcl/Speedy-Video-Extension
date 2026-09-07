@@ -14,8 +14,15 @@
   "content_scripts": [
     {
       "matches": [
+        "https://www.disneyplus.com/*",
+        "https://disneyplus.com/*",
+        "https://www.hbomax.com/*",
+        "https://hbomax.com/*",
+        "https://play.hbomax.com/*",
         "https://www.instagram.com/*",
         "https://www.netflix.com/*",
+        "https://nostv.pt/*",
+        "https://www.nostv.pt/*",
         "https://www.patreon.com/*",
         "https://web.whatsapp.com/*",
         "https://twitter.com/*",

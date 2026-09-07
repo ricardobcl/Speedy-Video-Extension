@@ -117,6 +117,9 @@ By default the extension runs on:
 | -------------- | ------------------------------------------------------------------ |
 | Youtube        | regular videos and Shorts; covered by automated checks             |
 | Netflix        | the seek shortcuts are left to Netflix's own                       |
+| NOS TV         | `nostv.pt` (live TV and on-demand)                                 |
+| Disney+        | `disneyplus.com`                                                   |
+| HBO Max        | `hbomax.com`, including the `play.hbomax.com` player               |
 | Instagram      | feed, reels and stories                                            |
 | X              | `x.com` and `twitter.com`                                          |
 | Patreon        | Patreon's own player and embedded Youtube videos                   |
@@ -192,9 +195,9 @@ const config = {
 ## 🌐 Website Whitelist
 
 The extension only runs on explicitly allowed websites. By default it comes
-with Youtube, Netflix, Instagram, X, Patreon and WhatsApp, but you can change which
-pages this extension runs by changing `content_scripts` -> `matches` in
-`chrome/manifest.json` (see
+with Youtube, Netflix, NOS TV, Disney+, HBO Max, Instagram, X, Patreon and
+WhatsApp, but you can change which pages this extension runs by changing
+`content_scripts` -> `matches` in `chrome/manifest.json` (see
 [google's content script docs](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts)
 for more information). After changing it, click the reload icon on the
 extension's card in `chrome://extensions`, or run `make safari` again.
