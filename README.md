@@ -1,10 +1,10 @@
 <h1 align="center">🎬 HTML5 Speedy Video Extension</h1>
 
-<p align="center"><b>⚡ Freshly rebuilt in 2026 — version 4.2 ⚡</b><br>
+<p align="center"><b>⚡ Freshly rebuilt in 2026 — version 4.3 ⚡</b><br>
 Manifest V3 · Chrome &amp; Safari · one-command install</p>
 
 <p align="center">
-  <img alt="Version 4.2" src="https://img.shields.io/badge/version-4.2-brightgreen">
+  <img alt="Version 4.3" src="https://img.shields.io/badge/version-4.3-brightgreen">
   <img alt="Updated 2026" src="https://img.shields.io/badge/updated-2026-ff69b4">
   <img alt="Manifest V3" src="https://img.shields.io/badge/manifest-v3-blue">
   <a href="https://github.com/ricardobcl/HTML5-Speedy-Video-Extension/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ricardobcl/HTML5-Speedy-Video-Extension/actions/workflows/ci.yml/badge.svg"></a>
