@@ -23,8 +23,15 @@ Last tested on Youtube with Chrome 152 and Safari 26.6.
 
 ## 🆕 What's new in 4.x (2026)
 
-The 2018 version stopped loading years ago: Manifest V2 is gone from Chrome
-and the old extension format is gone from Safari. 4.0 is a rebuild:
+**4.3**
+
+- 🌐 **Four more websites** — NOS TV, Disney+, HBO Max and Prime Video
+- ⚡ **Lighter on every page** — it no longer polls the page looking for a video, so a Youtube video costs no full-DOM scans at all (it did one a second), and a tab with no video one instead of 150
+- ⌨️ **Shortcuts are always installed** — they used to wait for a video to be found, so a video that showed up late could leave them missing
+- 🎨 **A new icon**
+
+**4.0** — the 2018 version stopped loading years ago: Manifest V2 is gone from
+Chrome and the old extension format is gone from Safari. 4.0 is a rebuild:
 
 - ✅ **Works again** — Manifest V3, tested on Chrome 152
 - 🧭 **Safari support** — as a signed Safari Web Extension (`make safari`)
