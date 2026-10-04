@@ -24,6 +24,10 @@ Last tested on Youtube with Chrome 152 and Safari 26.6.
 
 ## 🆕 What's new in 4.x (2026)
 
+**4.6**
+
+- ⚙️ **An options page** — change every shortcut, the speed step (e.g. 0.2x instead of 0.25x), the slowest and fastest speeds, the presets and the seek amounts, without editing the code; changes apply to open tabs right away
+
 **4.5**
 
 - 🎯 **Speeds stay on the step** — after bottoming out at 0.2x, `w` now goes to 0.25x instead of 0.45x, 0.7x, 0.95x…
