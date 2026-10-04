@@ -118,8 +118,15 @@ class SpeedyVideo {
     this.showOverlay()
   }
 
-  changeSpeed(delta) {
-    this.setSpeed(this.speed + delta)
+  // one speedDelta faster (+1) or slower (-1), landing on a multiple of it, so
+  // that the speeds stay 0.25, 0.5, 0.75... even after being clamped to a
+  // minSpeed that isn't one (0.2 -> 0.25, not 0.45) or set off-grid by a preset
+  changeSpeed(direction) {
+    const steps = this.speed / config.speedDelta
+    const epsilon = 1e-6 // 0.6 / 0.2 is 2.9999999999999996
+    const next =
+      direction > 0 ? Math.floor(steps + epsilon) + 1 : Math.ceil(steps - epsilon) - 1
+    this.setSpeed(next * config.speedDelta)
   }
 
   // (re)applies the chosen speed to the video playing now; also runs every
@@ -237,8 +244,8 @@ class SpeedyVideo {
   }
 
   #speedActionFor(key) {
-    if (key === config.fasterKey) return () => this.changeSpeed(+config.speedDelta)
-    if (key === config.slowerKey) return () => this.changeSpeed(-config.speedDelta)
+    if (key === config.fasterKey) return () => this.changeSpeed(+1)
+    if (key === config.slowerKey) return () => this.changeSpeed(-1)
     if (key === config.overlayKey) return () => this.showOverlay()
     const preset = config.speedPresets[key]
     return preset === undefined ? undefined : () => this.setSpeed(preset)
