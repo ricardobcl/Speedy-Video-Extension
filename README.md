@@ -23,6 +23,10 @@ Last tested on Youtube with Chrome 152 and Safari 26.6.
 
 ## 🆕 What's new in 4.x (2026)
 
+**4.4**
+
+- 🏷️ **A new name** — *HTML5 Speedy Video* is now just *Speedy Video*: every video on the web is HTML5 these days
+
 **4.3**
 
 - 🌐 **Four more websites** — NOS TV, Disney+, HBO Max and Prime Video
