@@ -1,4 +1,4 @@
-<h1 align="center">🎬 HTML5 Speedy Video Extension</h1>
+<h1 align="center">🎬 Speedy Video</h1>
 
 <p align="center"><b>⚡ Freshly rebuilt in 2026 — version 4.3 ⚡</b><br>
 Manifest V3 · Chrome &amp; Safari · one-command install</p>
@@ -98,7 +98,7 @@ can download it too). Then:
    This converts the Chrome extension into a Safari Web Extension Xcode
    project (in the git-ignored `safari/` folder), signs and builds the small
    wrapper app and opens it, which registers the extension with Safari.
-3. In Safari → Settings → Extensions, turn on **HTML5 Speedy Video**
+3. In Safari → Settings → Extensions, turn on **Speedy Video**
 4. Open a Youtube video, click the extension's icon in the toolbar and choose
    **Always Allow on Every Website** — Safari asks for permission per website
    even for the whitelisted ones, and the extension does nothing until you

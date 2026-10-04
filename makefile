@@ -1,7 +1,9 @@
 CHROME = chrome
 ZIP = SpeedyChrome.zip
 SAFARI = safari
-APP = HTML5 Speedy Video
+APP = Speedy Video
+# from the old name (HTML5 Speedy Video), kept so Safari still sees the same
+# extension: a new id would have to be turned on and allowed on websites again
 BUNDLE_ID = com.ricardobcl.html5speedyvideo
 # Apple team used to sign the Safari app: the first (preferably free/personal)
 # team of the Apple IDs added in Xcode > Settings > Accounts. Without one the
