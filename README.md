@@ -23,6 +23,12 @@ Last tested on Youtube with Chrome 152 and Safari 26.6.
 
 ## 🆕 What's new in 4.x (2026)
 
+**4.5**
+
+- 🎯 **Speeds stay on the step** — after bottoming out at 0.2x, `w` now goes to 0.25x instead of 0.45x, 0.7x, 0.95x…
+- ⌨️ **Typing is safe in more text fields** — keys typed in fields built as web components (inside shadow DOM) no longer change the speed
+- ⚡ **Lighter after a video goes away** — e.g. closing WhatsApp's video viewer no longer leaves it scanning the page every second
+
 **4.4**
 
 - 🏷️ **A new name** — *HTML5 Speedy Video* is now just *Speedy Video*: every video on the web is HTML5 these days
