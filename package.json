@@ -1,10 +1,10 @@
 {
-  "name": "html5-speedy-video-extension",
+  "name": "speedy-video-extension",
   "version": "4.3.0",
   "private": true,
   "description": "Browser extension that adds fine-grained playback speed control on HTML5 videos.",
   "license": "MIT",
-  "repository": "github:ricardobcl/HTML5-Speedy-Video-Extension",
+  "repository": "github:ricardobcl/Speedy-Video-Extension",
   "scripts": {
     "lint": "eslint",
     "build": "make"

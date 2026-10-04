@@ -7,7 +7,7 @@ Manifest V3 · Chrome &amp; Safari · one-command install</p>
   <img alt="Version 4.3" src="https://img.shields.io/badge/version-4.3-brightgreen">
   <img alt="Updated 2026" src="https://img.shields.io/badge/updated-2026-ff69b4">
   <img alt="Manifest V3" src="https://img.shields.io/badge/manifest-v3-blue">
-  <a href="https://github.com/ricardobcl/HTML5-Speedy-Video-Extension/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ricardobcl/HTML5-Speedy-Video-Extension/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/ricardobcl/Speedy-Video-Extension/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ricardobcl/Speedy-Video-Extension/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-lightgrey">
 </p>
 
@@ -53,7 +53,7 @@ Chrome and the old extension format is gone from Safari. 4.0 is a rebuild:
 
 ## 🚀 Install in Chrome
 
-**Without a terminal** — [download the ZIP of this repo](https://github.com/ricardobcl/HTML5-Speedy-Video-Extension/archive/refs/heads/master.zip)
+**Without a terminal** — [download the ZIP of this repo](https://github.com/ricardobcl/Speedy-Video-Extension/archive/refs/heads/master.zip)
 and unzip it (the extension comes pre-built). Then:
 
 1. Go to [chrome://extensions](chrome://extensions) and turn on **Developer mode** (top right corner)
@@ -64,8 +64,8 @@ Done — open a Youtube video.
 **With git** (easier to update later):
 
 ```Shell
-git clone https://github.com/ricardobcl/HTML5-Speedy-Video-Extension.git
-cd HTML5-Speedy-Video-Extension
+git clone https://github.com/ricardobcl/Speedy-Video-Extension.git
+cd Speedy-Video-Extension
 make install
 ```
 
