@@ -14,8 +14,7 @@ if (!globalThis.speedyVideo) {
 
 const ALL_SITES = "*://*/*"
 
-// the sites the extension ran on before 4.x asked first, which the options page
-// offers to turn on in one go
+// a few popular video sites, which the options page offers to turn on in one go
 const usualSites = [
   "*://*.youtube.com/*",
   "*://*.youtube-nocookie.com/*",

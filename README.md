@@ -12,10 +12,9 @@ Manifest V3 · Chrome &amp; Safari · one-command install</p>
 </p>
 
 A tiny browser extension for fine-grained control over the playback speed of
-HTML5 videos on Youtube (Shorts included), Netflix, Instagram, X, Patreon, WhatsApp
-or any other website you turn it on for: keyboard shortcuts, plus an overlay that
-shows the speed whenever it changes — and that overlay is the only thing it adds
-to the page.
+HTML5 videos on any website you turn it on for: keyboard shortcuts, plus an
+overlay that shows the speed whenever it changes — and that overlay is the only
+thing it adds to the page.
 
 It is a small [Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate)
 extension: no network access, and access only to the websites you turn it on
@@ -28,7 +27,7 @@ been tested in Chrome so far.
 
 **5.0** — you choose where it runs:
 
-- 🔐 **Turn it on site by site, or everywhere** — from the new toolbar popup, instead of editing a whitelist in the manifest; it asks for no access at install, and starts in the open tabs right away. With all sites on, single sites can still be turned off
+- 🔐 **Turn it on site by site, or everywhere** — from the new toolbar popup; it asks for no access at install, and starts in the open tabs right away. With all sites on, single sites can still be turned off
 - 🚦 **A toolbar icon that shows it** — in color where it runs, grey where it doesn't, with the speed when it isn't 1x
 - 💾 **Remember the speed** — optional, per site or for all sites; open tabs follow along
 - 🌐 **Sites on the options page** — the list of sites, and the usual video sites in one click
@@ -166,34 +165,19 @@ where it is on, with the current speed in a badge when it isn't 1x.
 - With **all sites** on, you can still turn it off on single sites; the
   popup turns them back on.
 - The options page lists the sites it runs on (and the ones turned off), with
-  buttons to remove them, to turn on all sites, or to turn on the usual video
-  sites in one go: Youtube, Netflix, Disney+, HBO Max, Prime Video, Instagram,
-  X, Patreon, WhatsApp and NOS TV.
+  buttons to remove them, to turn on all sites, or to turn on a few popular
+  video sites in one go.
 
 <img src="screenshots/options.png" width="720" alt="The sites on the options page">
-
-These are the sites it has been tried on:
-
-| Website        | Notes                                                              |
-| -------------- | ------------------------------------------------------------------ |
-| Youtube        | regular videos and Shorts                                          |
-| Netflix        | the seek shortcuts are left to Netflix's own                       |
-| NOS TV         | `nostv.pt` (live TV and on-demand)                                 |
-| Disney+        | `disneyplus.com`                                                   |
-| HBO Max        | `hbomax.com`, including the `play.hbomax.com` player               |
-| Prime Video    | `primevideo.com`                                                   |
-| Instagram      | feed, reels and stories                                            |
-| X              | `x.com` and `twitter.com`                                          |
-| Patreon        | Patreon's own player and embedded Youtube videos                   |
-| WhatsApp       | videos opened in the viewer of `web.whatsapp.com`                  |
-| Youtube embeds | on any website, once `youtube.com` and `youtube-nocookie.com` are on (the usual video sites include both): click the embedded player first, so it has focus |
 
 It works on any HTML5 `<video>`, also inside shadow DOM: it controls the video
 that is playing (the largest one, if several are), so it follows you through
 feeds, reels, stories and Shorts, and keeps the speed you chose across videos
-until you change it (and across pages too, if you have it remember the speed). Videos that show up later, e.g. opened in a viewer, are
-picked up when they start playing. It also runs inside frames, which is how
-embedded Youtube players work.
+until you change it (and across pages too, if you have it remember the
+speed). Videos that show up later, e.g. opened in a viewer, are picked up when
+they start playing. It also runs inside frames, so a Youtube player embedded
+in another site works once `youtube.com` and `youtube-nocookie.com` are on:
+click the player first, so it has the keyboard focus.
 
 ## ⌨️ Keyboard Shortcuts
 
