@@ -24,7 +24,11 @@
   },
   "action": {
     "default_title": "Speedy Video",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/Icon-16-off.png",
+      "32": "icons/Icon-32-off.png"
+    }
   },
   "options_ui": {
     "page": "options.html",

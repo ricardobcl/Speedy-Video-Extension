@@ -148,6 +148,9 @@ its icon in the toolbar and choose **Turn on for youtube.com** (or **Turn on
 for all sites**); the browser asks you to confirm, and it starts working in
 the open tabs right away, no reload needed. The same popup turns it off again.
 
+The toolbar icon shows where it runs: grey on a tab where it is off, in color
+where it is on, with the current speed in a badge when it isn't 1x.
+
 - A site includes its subdomains: turning on `youtube.com` also covers
   `music.youtube.com`.
 - With **all sites** on, you can still turn it off on single sites; the

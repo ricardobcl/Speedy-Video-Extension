@@ -1,9 +1,10 @@
 /* global ALL_SITES, isAllowed, patternMatches, readSites, siteName */
 
 // The background service worker. It keeps the content script registered for
-// the sites that are on (see sites.js) and starts and stops it in the open
-// tabs when they change. It keeps no state of its own, since the browser stops
-// it whenever it is idle.
+// the sites that are on (see sites.js), starts and stops it in the open tabs
+// when they change, and shows on the toolbar icon whether it runs in a tab and
+// at what speed. It keeps no state of its own, since the browser stops it
+// whenever it is idle.
 
 importScripts("sites.js")
 
@@ -14,6 +15,10 @@ const CONTENT_SCRIPT = {
   allFrames: true,
   runAt: "document_idle"
 }
+
+// the icon of a tab it runs in, and of the others (the manifest's default)
+const ON_ICON = { 16: "icons/Icon-16.png", 32: "icons/Icon-32.png" }
+const OFF_ICON = { 16: "icons/Icon-16-off.png", 32: "icons/Icon-32-off.png" }
 
 // ------------------------------------------------------ the content script
 
@@ -124,4 +129,31 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (welcomed) return
   await chrome.storage.local.set({ welcomed: true })
   chrome.tabs.create({ url: chrome.runtime.getURL("options.html?welcome") })
+})
+
+// ------------------------------------------------------------ toolbar icon
+
+// "2x", "1.5x", "1.25": badges fit about four characters
+const badgeText = speed => {
+  const text = `${Math.round(speed * 100) / 100}`
+  return text.length < 4 ? `${text}x` : text
+}
+
+chrome.action.setBadgeBackgroundColor({ color: "#d93a1a" }) // safari ignores it
+
+// The content script reports when it starts or changes the speed, and when it
+// stops; the icon is in color where it runs, with the speed unless it is 1x.
+// Any frame counts (e.g. an embedded Youtube player), but only the page itself
+// stopping turns the icon off.
+chrome.runtime.onMessage.addListener((message, sender) => {
+  const tabId = sender.tab?.id
+  if (tabId === undefined) return
+  if (message.type === "speed") {
+    chrome.action.setIcon({ tabId, path: ON_ICON }).catch(() => {}) // the tab may be gone
+    const text = message.speed === 1 ? "" : badgeText(message.speed)
+    chrome.action.setBadgeText({ tabId, text }).catch(() => {})
+  } else if (message.type === "stopped" && sender.frameId === 0) {
+    chrome.action.setIcon({ tabId, path: OFF_ICON }).catch(() => {})
+    chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {})
+  }
 })

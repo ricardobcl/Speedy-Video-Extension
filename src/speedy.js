@@ -116,6 +116,12 @@ class SpeedyVideo {
     this.#watchPlayback()
     this.#setupShortcuts()
     this.#keepSpeedApplied() // in case a video is already playing
+    this.#report()
+    // a page restored by the back button keeps this copy running, but the
+    // browser resets the toolbar icon of the tab
+    window.addEventListener("pageshow", event => event.persisted && this.#report(), {
+      signal: this.#listeners.signal
+    })
   }
 
   // leaves the page alone again (its site was turned off, or the extension
@@ -129,6 +135,7 @@ class SpeedyVideo {
     for (const name of [...this.#timers.keys()]) this.#stopTimer(name)
     clearTimeout(this.#overlayTimeout)
     document.getElementById("speedy-overlay")?.remove()
+    if (chrome.runtime?.id) this.#report("stopped")
   }
 
   // sets a new playback speed, clamped to [minSpeed, maxSpeed] and rounded to
@@ -138,6 +145,7 @@ class SpeedyVideo {
     log(`Speed set to ${this.speed}`)
     this.#keepSpeedApplied() // applies it now and keeps it applied from here on
     this.showOverlay()
+    this.#report()
     if (config.rememberSpeed !== "off") {
       chrome.storage.local
         .set({ [speedKey()]: this.speed })
@@ -152,7 +160,9 @@ class SpeedyVideo {
     if (adopted === this.speed) return
     log(`Speed adopted: ${adopted}`)
     this.speed = adopted
-    if (this.running) this.#keepSpeedApplied()
+    if (!this.running) return
+    this.#keepSpeedApplied()
+    this.#report()
   }
 
   // one speedDelta faster (+1) or slower (-1), landing on a multiple of it, so
@@ -210,6 +220,12 @@ class SpeedyVideo {
       () => overlay.classList.remove("speedy-visible"),
       config.overlayDuration
     )
+  }
+
+  // tells the background script, for the toolbar icon, the speed or that it
+  // stopped (sendMessage fails while the worker restarts, which is harmless)
+  #report(type = "speed") {
+    chrome.runtime.sendMessage({ type, speed: this.speed }).catch(() => {})
   }
 
   // After the extension is updated, reloaded or removed, this copy stays in
