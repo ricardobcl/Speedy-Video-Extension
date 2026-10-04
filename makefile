@@ -40,11 +40,13 @@ install: chrome
 	@ echo ""
 	@ echo "To update later: git pull && make install, then click reload on the extension card."
 
+# the Chrome extension folder is src/ plus the icons, rebuilt from scratch so
+# that nothing deleted from src/ lingers in it
 chrome: clean_chrome
 	@ echo "> Building the Chrome extension folder..."
 	@ mkdir -p "$(CHROME)/icons"
+	@ cp src/* "$(CHROME)"
 	@ cp icons/*.png "$(CHROME)/icons"
-	@ cp src/speedy.js src/style.css "$(CHROME)"
 	@ echo "$(GREEN)Chrome extension is ready!$(PLAIN)"
 
 # Converts the Chrome extension into a Safari Web Extension Xcode project,
@@ -93,8 +95,7 @@ clean: clean_chrome clean_release
 	@ rm -rf "$(SAFARI)"
 
 clean_chrome:
-	@ rm -rf "$(CHROME)/icons"
-	@ rm -f "$(CHROME)/speedy.js" "$(CHROME)/style.css" "$(CHROME)/.DS_Store"
+	@ rm -rf "$(CHROME)"
 
 # zip for the Chrome Web Store, which wants the manifest at the root of the
 # archive, not inside a folder

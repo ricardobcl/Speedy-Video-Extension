@@ -18,4 +18,6 @@ jobs:
       - run: npm run lint
       - run: make
       - name: Committed build must match src (if this fails, run 'make' and commit)
-        run: git diff --exit-code -- chrome
+        run: |
+          git status --short -- chrome
+          test -z "$(git status --porcelain -- chrome)"

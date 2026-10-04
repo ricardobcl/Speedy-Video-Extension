@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Speedy Video",
+  "version": "4.5",
+  "description": "This extension adds fine-grained playback speed control on HTML5 videos.",
+  "icons": {
+    "16": "icons/Icon-16.png",
+    "32": "icons/Icon-32.png",
+    "48": "icons/Icon-48.png",
+    "64": "icons/Icon-64.png",
+    "128": "icons/Icon-128.png",
+    "256": "icons/Icon-256.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.disneyplus.com/*",
+        "https://disneyplus.com/*",
+        "https://www.hbomax.com/*",
+        "https://hbomax.com/*",
+        "https://play.hbomax.com/*",
+        "https://www.primevideo.com/*",
+        "https://primevideo.com/*",
+        "https://www.instagram.com/*",
+        "https://www.netflix.com/*",
+        "https://nostv.pt/*",
+        "https://www.nostv.pt/*",
+        "https://www.patreon.com/*",
+        "https://web.whatsapp.com/*",
+        "https://twitter.com/*",
+        "https://x.com/*",
+        "https://www.youtube.com/*",
+        "https://youtube.com/*",
+        "https://www.youtube-nocookie.com/*"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle",
+      "css": [
+        "style.css"
+      ],
+      "js": [
+        "speedy.js"
+      ]
+    }
+  ]
+}
