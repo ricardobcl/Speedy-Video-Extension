@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Speedy Video",
-  "version": "4.3",
+  "version": "4.4",
   "description": "This extension adds fine-grained playback speed control on HTML5 videos.",
   "icons": {
     "16": "icons/Icon-16.png",
