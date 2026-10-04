@@ -120,7 +120,10 @@ const defaultSettings = Object.freeze({
   fasterKey: "w", // key that speeds up by speedDelta
   slowerKey: "q", // key that slows down by speedDelta
   overlayKey: "z", // key that shows the current speed on top of the video
-  overlayDuration: 1000 // ms the speed overlay stays visible
+  overlayDuration: 1000, // ms the speed overlay stays visible
+  // "site": a page starts at the last speed on its site, "all": at the last
+  // speed anywhere, "off": at 1x
+  rememberSpeed: "off"
 })
 
 // The settings in effect: the saved ones, and the defaults for the rest. Not
@@ -165,6 +168,11 @@ const log = message => {
 }
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
+
+// where the remembered speed is kept in storage.local: one per site (its host
+// without "www."), or one for all
+const speedKey = () =>
+  config.rememberSpeed === "all" ? "speed" : `speed:${location.hostname.replace(/^www\./, "")}`
 
 // "1.25" and "2" instead of "1.2500000000000002" and "2.00"
 const formatSpeed = speed => `${Math.round(speed * 100) / 100}`
@@ -265,6 +273,21 @@ class SpeedyVideo {
     log(`Speed set to ${this.speed}`)
     this.#keepSpeedApplied() // applies it now and keeps it applied from here on
     this.showOverlay()
+    if (config.rememberSpeed !== "off") {
+      chrome.storage.local
+        .set({ [speedKey()]: this.speed })
+        .catch(error => log(`Could not remember the speed: ${error}`))
+    }
+  }
+
+  // takes on a speed chosen elsewhere (the remembered one, or one just chosen
+  // in another tab) quietly: without the overlay, and without remembering it
+  adoptSpeed(speed) {
+    const adopted = clamp(speed, config.minSpeed, config.maxSpeed)
+    if (adopted === this.speed) return
+    log(`Speed adopted: ${adopted}`)
+    this.speed = adopted
+    if (this.running) this.#keepSpeedApplied()
   }
 
   // one speedDelta faster (+1) or slower (-1), landing on a multiple of it, so
@@ -448,7 +471,10 @@ class SpeedyVideo {
 // changes without a reload. Until then (a few ms) the defaults apply.
 const watchSettings = () => {
   readSettings()
-    .then(settings => Object.assign(config, settings))
+    .then(settings => {
+      Object.assign(config, settings)
+      restoreSpeed()
+    })
     .catch(error => log(`Could not read the settings: ${error}`))
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "sync") return
@@ -456,6 +482,26 @@ const watchSettings = () => {
       // no newValue means it was reset to the default
       if (name in defaultSettings) config[name] = newValue ?? defaultSettings[name]
     }
+  })
+}
+
+// With "remember the speed" on, a page starts at the speed chosen last (on its
+// site, or anywhere), and a speed chosen in one tab carries over to the open
+// tabs that share it
+const restoreSpeed = () => {
+  if (config.rememberSpeed === "off") return
+  const key = speedKey()
+  chrome.storage.local
+    .get(key)
+    .then(stored => stored[key] !== undefined && speedy.adoptSpeed(stored[key]))
+    .catch(error => log(`Could not read the remembered speed: ${error}`))
+}
+
+const watchRememberedSpeed = () => {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || config.rememberSpeed === "off") return
+    const speed = changes[speedKey()]?.newValue
+    if (speed !== undefined) speedy.adoptSpeed(speed)
   })
 }
 
@@ -467,6 +513,7 @@ const watchSettings = () => {
 const speedy = new SpeedyVideo()
 globalThis.speedyVideo = speedy
 watchSettings()
+watchRememberedSpeed()
 // the background script tells every tab when the sites that are on change
 chrome.runtime.onMessage.addListener(message => {
   if (message.type !== "sites") return

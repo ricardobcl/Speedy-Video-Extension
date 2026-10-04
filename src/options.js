@@ -257,6 +257,7 @@ const render = () => {
     step.add(new Option(settings.speedDelta, settings.speedDelta))
   }
   step.value = settings.speedDelta
+  element("rememberSpeed").value = settings.rememberSpeed
   for (const [name, { scale = 1 }] of Object.entries(numberFields)) {
     element(name).value = settings[name] / scale
     setError(element(name), element(`${name}-error`), undefined)
@@ -292,6 +293,9 @@ const start = async () => {
 
   element("speedDelta").addEventListener("change", event =>
     save({ speedDelta: Number(event.target.value) })
+  )
+  element("rememberSpeed").addEventListener("change", event =>
+    save({ rememberSpeed: event.target.value })
   )
   for (const name of Object.keys(numberFields)) {
     element(name).addEventListener("change", event => onNumberChange(event.target))

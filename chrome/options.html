@@ -50,6 +50,14 @@
         </span>
       </div>
       <div class="row">
+        <label for="rememberSpeed">Remember the speed</label>
+        <select id="rememberSpeed">
+          <option value="off">No, always start at 1x</option>
+          <option value="site">For each site</option>
+          <option value="all">For all sites</option>
+        </select>
+      </div>
+      <div class="row">
         <label for="minSpeed">Slowest speed</label>
         <span class="field"><input type="number" id="minSpeed" min="0.1" max="16" step="0.05">x</span>
         <span class="error" id="minSpeed-error"></span>

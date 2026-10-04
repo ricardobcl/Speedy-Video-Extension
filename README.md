@@ -176,7 +176,7 @@ These are the sites it has been tried on:
 It works on any HTML5 `<video>`, also inside shadow DOM: it controls the video
 that is playing (the largest one, if several are), so it follows you through
 feeds, reels, stories and Shorts, and keeps the speed you chose across videos
-until you change it. Videos that show up later, e.g. opened in a viewer, are
+until you change it (and across pages too, if you have it remember the speed). Videos that show up later, e.g. opened in a viewer, are
 picked up when they start playing. It also runs inside frames, which is how
 embedded Youtube players work.
 
@@ -225,7 +225,9 @@ the extension's toolbar icon → **Options**, or from its card in
 Settings → Extensions → Speedy Video → **Settings**.
 
 - **Sites**: the sites it runs on (see [Sites](#sites))
-- **Speed**: the step for speeding up and slowing down (0.05x to 1x), and the
+- **Speed**: whether to remember the speed (for each site, or one for all
+  sites: new pages start at it, and changing it in one tab changes it in the
+  others), the step for speeding up and slowing down (0.05x to 1x), and the
   slowest and fastest speeds
 - **Shortcuts**: the speed up, slow down and show-the-speed keys, and the
   speed presets (add, remove or change a key and its speed). Single keys

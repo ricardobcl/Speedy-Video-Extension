@@ -13,7 +13,10 @@ const defaultSettings = Object.freeze({
   fasterKey: "w", // key that speeds up by speedDelta
   slowerKey: "q", // key that slows down by speedDelta
   overlayKey: "z", // key that shows the current speed on top of the video
-  overlayDuration: 1000 // ms the speed overlay stays visible
+  overlayDuration: 1000, // ms the speed overlay stays visible
+  // "site": a page starts at the last speed on its site, "all": at the last
+  // speed anywhere, "off": at 1x
+  rememberSpeed: "off"
 })
 
 // The settings in effect: the saved ones, and the defaults for the rest. Not
