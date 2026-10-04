@@ -20,8 +20,7 @@ It is a small [Manifest V3](https://developer.chrome.com/docs/extensions/develop
 extension: no network access, and access only to the websites you turn it on
 for, which it asks for one site at a time (or all at once, if you prefer).
 Local installation only, for now.
-4.6 was last tested on Youtube with Chrome 152 and Safari 26.6; 5.0 has only
-been tested in Chrome so far.
+Last tested with Chrome 153 and Safari 27.0.
 
 ## 🆕 What's new (2026)
 
