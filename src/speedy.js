@@ -1,3 +1,5 @@
+/* global defaultSettings, readSettings */
+
 /**
  * Speedy Video: fine-grained playback speed control for HTML5 videos.
  *
@@ -8,22 +10,14 @@
  * the page. It runs in every frame, so embedded players (e.g. a Youtube video
  * on another site) work too, once they have the keyboard focus. Videos that
  * appear later, without a page change (e.g. the viewer on Whatsapp), are
- * picked up when they start playing.
+ * picked up when they start playing. The shortcuts and speeds come from the
+ * options page (settings.js, loaded before this script, has the defaults).
  */
 
 // -------------------------------------------------------------- configuration
 
 const config = {
-  speedDelta: 0.25, // smallest increment or decrement of playback speed
-  minSpeed: 0.2, // lowest playback speed allowed
-  maxSpeed: 4.0, // highest playback speed allowed
-  speedPresets: { a: 1.0, s: 2.0, d: 3.0 }, // key -> playback speed
-  skipSmall: 2, // seconds seeked by shift + left/right
-  skipBig: 10, // seconds seeked by shift + up/down
-  fasterKey: "w", // key that speeds up by speedDelta
-  slowerKey: "q", // key that slows down by speedDelta
-  overlayKey: "z", // key that shows the current speed on top of the video
-  overlayDuration: 1000, // ms the speed overlay stays visible
+  ...defaultSettings, // replaced by the ones changed on the options page
   applyInterval: 1000, // ms between checks that the playing video has the chosen speed
   pollInterval: 250, // ms between checks for a URL change, without the Navigation API
   debug: false // enables console.log debug info
@@ -103,6 +97,7 @@ class SpeedyVideo {
 
   start() {
     log("Starting Speedy Video")
+    this.#loadSettings()
     this.#watchUrlChanges()
     this.#watchPlayback()
     this.#setupShortcuts()
@@ -172,6 +167,24 @@ class SpeedyVideo {
       () => overlay.classList.remove("speedy-visible"),
       config.overlayDuration
     )
+  }
+
+  // ----------------------------------------------------------------- settings
+
+  // The settings changed on the options page replace the defaults as soon as
+  // they are read, and again whenever they change, so that open tabs pick up
+  // the changes without a reload. Until then (a few ms) the defaults apply.
+  #loadSettings() {
+    readSettings()
+      .then(settings => Object.assign(config, settings))
+      .catch(error => log(`Could not read the settings: ${error}`))
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== "sync") return
+      for (const [name, { newValue }] of Object.entries(changes)) {
+        // no newValue means it was reset to the default
+        if (name in defaultSettings) config[name] = newValue ?? defaultSettings[name]
+      }
+    })
   }
 
   // ------------------------------------------------ keeping the speed applied

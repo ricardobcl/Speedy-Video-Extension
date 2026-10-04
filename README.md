@@ -18,7 +18,8 @@ whenever it changes — and that overlay is the only thing it adds to the page.
 
 It is a small [Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate)
 content-script extension: no background page, no network access and no
-permissions beyond the whitelisted websites. Local installation only, for now.
+permissions beyond the whitelisted websites and storage for your settings.
+Local installation only, for now.
 Last tested on Youtube with Chrome 152 and Safari 26.6.
 
 ## 🆕 What's new in 4.x (2026)
@@ -167,47 +168,46 @@ whitelist (see [Website Whitelist](#-website-whitelist)).
 | shift + :arrow_down:  | \*\* Rewind 10 seconds              |
 | shift + :arrow_up:    | \*\* Skip 10 seconds                |
 
-Whenever the speed changes the new speed is shown for a second in an overlay
-near the top of the video, also in fullscreen. Press `z`
-to show it at any time.
+These are the defaults; every key and amount can be changed on the options
+page (see [Options](#options) below). Whenever the speed changes the new speed
+is shown for a second in an overlay near the top of the video, also in
+fullscreen. Press `z` to show it at any time.
 
 Notes:
 
-- The speed is kept between `minSpeed` and `maxSpeed` (0.2x to 4x by default).
+- The speed is kept between the slowest and fastest speeds (0.2x to 4x by
+  default), and `w`/`q` step to the next multiple of the step (0.25x by
+  default).
 - Shortcuts are ignored while you are typing in a text field, so they don't
   interfere with searching or commenting, and modifier combos like
   control + `a` are never stolen.
 - The letter keys are only taken while a video is on screen; with none (e.g.
   a chat with its video viewer closed) they reach the website as usual.
-- They are all configurable in the `config` object of `src/speedy.js`
-  (`fasterKey`, `slowerKey`, `overlayKey` and `speedPresets`).
 
 \*\* Not on Netflix, although they do skip and rewind by default anyway, just
 not these amounts.
 
-## ⚙️ Config
+<a id="options"></a>
 
-These are the variables (the `config` object at the top of `src/speedy.js`)
-that you can modify to fit your taste (run `make` or `make safari` again
-afterwards):
+## ⚙️ Options
 
-```Javascript
-const config = {
-  speedDelta: 0.25, // smallest increment or decrement of playback speed
-  minSpeed: 0.2, // lowest playback speed allowed
-  maxSpeed: 4.0, // highest playback speed allowed
-  speedPresets: { a: 1.0, s: 2.0, d: 3.0 }, // key -> playback speed
-  skipSmall: 2, // seconds seeked by shift + left/right
-  skipBig: 10, // seconds seeked by shift + up/down
-  fasterKey: "w", // key that speeds up by speedDelta
-  slowerKey: "q", // key that slows down by speedDelta
-  overlayKey: "z", // key that shows the current speed on top of the video
-  overlayDuration: 1000, // ms the speed overlay stays visible
-  applyInterval: 1000, // ms between checks that the playing video has the chosen speed
-  pollInterval: 250, // ms between checks for a URL change, without the Navigation API
-  debug: false // enables console.log debug info
-}
-```
+The options page changes the shortcuts and speeds; changes are saved right
+away and apply to open tabs too, no reload needed. Open it by right-clicking
+the extension's toolbar icon → **Options**, or from its card in
+`chrome://extensions` → **Details** → **Extension options**. In Safari:
+Settings → Extensions → Speedy Video → **Settings**.
+
+- **Speed**: the step for speeding up and slowing down (0.05x to 1x), and the
+  slowest and fastest speeds
+- **Shortcuts**: the speed up, slow down and show-the-speed keys, and the
+  speed presets (add, remove or change a key and its speed). Single keys
+  only, without shift (that is for seeking) or other modifiers; a key that is
+  already taken is refused
+- **Seeking**: how far shift + the arrow keys jump
+- **Speed overlay**: how long the speed stays on the video
+
+Settings are kept in the browser's synced extension storage, so they follow
+your Chrome profile. The defaults live in `src/settings.js`.
 
 ## 🌐 Website Whitelist
 

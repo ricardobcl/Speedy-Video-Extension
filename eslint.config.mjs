@@ -15,7 +15,7 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",
-      globals: globals.browser
+      globals: { ...globals.browser, ...globals.webextensions }
     }
   }
 ]

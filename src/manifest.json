@@ -11,6 +11,13 @@
     "128": "icons/Icon-128.png",
     "256": "icons/Icon-256.png"
   },
+  "permissions": [
+    "storage"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
   "content_scripts": [
     {
       "matches": [
@@ -39,6 +46,7 @@
         "style.css"
       ],
       "js": [
+        "settings.js",
         "speedy.js"
       ]
     }

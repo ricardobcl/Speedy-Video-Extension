@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Speedy Video options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <header>
+    <img src="icons/Icon-64.png" alt="" width="36" height="36">
+    <h1>Speedy Video</h1>
+    <span id="status" role="status" aria-live="polite"></span>
+  </header>
+
+  <main>
+    <p class="intro">Changes are saved right away, and apply to open tabs too.</p>
+
+    <section>
+      <h2>Speed</h2>
+      <div class="row">
+        <label for="speedDelta">Speed up and slow down in steps of</label>
+        <span class="field">
+          <select id="speedDelta">
+            <option value="0.05">0.05</option>
+            <option value="0.1">0.1</option>
+            <option value="0.2">0.2</option>
+            <option value="0.25">0.25</option>
+            <option value="0.5">0.5</option>
+            <option value="1">1</option>
+          </select>x
+        </span>
+      </div>
+      <div class="row">
+        <label for="minSpeed">Slowest speed</label>
+        <span class="field"><input type="number" id="minSpeed" min="0.1" max="16" step="0.05">x</span>
+        <span class="error" id="minSpeed-error"></span>
+      </div>
+      <div class="row">
+        <label for="maxSpeed">Fastest speed</label>
+        <span class="field"><input type="number" id="maxSpeed" min="0.1" max="16" step="0.05">x</span>
+        <span class="error" id="maxSpeed-error"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Shortcuts</h2>
+      <p class="hint">Click a key, then press the new one. Shortcuts never fire while you type in a text field.</p>
+      <div class="row">
+        <span id="fasterKey-label">Speed up one step</span>
+        <button type="button" class="key" id="fasterKey" aria-labelledby="fasterKey-label fasterKey"></button>
+        <span class="error" id="fasterKey-error"></span>
+      </div>
+      <div class="row">
+        <span id="slowerKey-label">Slow down one step</span>
+        <button type="button" class="key" id="slowerKey" aria-labelledby="slowerKey-label slowerKey"></button>
+        <span class="error" id="slowerKey-error"></span>
+      </div>
+      <div class="row">
+        <span id="overlayKey-label">Show the current speed</span>
+        <button type="button" class="key" id="overlayKey" aria-labelledby="overlayKey-label overlayKey"></button>
+        <span class="error" id="overlayKey-error"></span>
+      </div>
+
+      <h3>Speed presets</h3>
+      <p class="hint">A key that jumps straight to a speed (capped by the slowest and fastest speeds).</p>
+      <div id="presets"></div>
+      <button type="button" class="text-button" id="addPreset">+ Add a preset</button>
+    </section>
+
+    <section>
+      <h2>Seeking</h2>
+      <div class="row">
+        <label for="skipSmall">Shift + ← / → jumps</label>
+        <span class="field"><input type="number" id="skipSmall" min="1" max="600" step="1">seconds</span>
+        <span class="error" id="skipSmall-error"></span>
+      </div>
+      <div class="row">
+        <label for="skipBig">Shift + ↓ / ↑ jumps</label>
+        <span class="field"><input type="number" id="skipBig" min="1" max="600" step="1">seconds</span>
+        <span class="error" id="skipBig-error"></span>
+      </div>
+      <p class="hint">Not on Netflix, which keeps its own seek shortcuts.</p>
+    </section>
+
+    <section>
+      <h2>Speed overlay</h2>
+      <div class="row">
+        <label for="overlayDuration">Show the speed on the video for</label>
+        <span class="field"><input type="number" id="overlayDuration" min="0.2" max="10" step="0.1">seconds</span>
+        <span class="error" id="overlayDuration-error"></span>
+      </div>
+    </section>
+
+    <footer>
+      <button type="button" class="secondary" id="reset">Reset to defaults</button>
+    </footer>
+  </main>
+
+  <script src="settings.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
