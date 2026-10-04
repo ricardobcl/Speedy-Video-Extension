@@ -21,9 +21,17 @@ It is a small [Manifest V3](https://developer.chrome.com/docs/extensions/develop
 extension: no network access, and access only to the websites you turn it on
 for, which it asks for one site at a time (or all at once, if you prefer).
 Local installation only, for now.
-Last tested on Youtube with Chrome 152 and Safari 26.6.
+4.6 was last tested on Youtube with Chrome 152 and Safari 26.6; 5.0 has only
+been tested in Chrome so far.
 
-## 🆕 What's new in 4.x (2026)
+## 🆕 What's new (2026)
+
+**5.0** — you choose where it runs:
+
+- 🔐 **Turn it on site by site, or everywhere** — from the new toolbar popup, instead of editing a whitelist in the manifest; it asks for no access at install, and starts in the open tabs right away. With all sites on, single sites can still be turned off
+- 🚦 **A toolbar icon that shows it** — in color where it runs, grey where it doesn't, with the speed when it isn't 1x
+- 💾 **Remember the speed** — optional, per site or for all sites; open tabs follow along
+- 🌐 **Sites on the options page** — the list of sites, and the usual video sites in one click
 
 **4.6**
 
@@ -151,6 +159,8 @@ the open tabs right away, no reload needed. The same popup turns it off again.
 The toolbar icon shows where it runs: grey on a tab where it is off, in color
 where it is on, with the current speed in a badge when it isn't 1x.
 
+<img src="screenshots/popup.png" width="280" alt="The toolbar popup, offering to turn Speedy Video on for twitch.tv or for all sites">
+
 - A site includes its subdomains: turning on `youtube.com` also covers
   `music.youtube.com`.
 - With **all sites** on, you can still turn it off on single sites; the
@@ -159,6 +169,8 @@ where it is on, with the current speed in a badge when it isn't 1x.
   buttons to remove them, to turn on all sites, or to turn on the usual video
   sites in one go: Youtube, Netflix, Disney+, HBO Max, Prime Video, Instagram,
   X, Patreon, WhatsApp and NOS TV.
+
+<img src="screenshots/options.png" width="720" alt="The sites on the options page">
 
 These are the sites it has been tried on:
 
