@@ -127,9 +127,14 @@ class SpeedyVideo {
   // and stories, and some players reset the rate on their own
   applySpeed = () => {
     this.video = findVideo()
-    if (this.video && this.video.playbackRate !== this.speed) {
-      this.video.playbackRate = this.speed
+    if (!this.video) {
+      // the video is gone (e.g. whatsapp's viewer was closed): stop checking,
+      // since with no video findVideo walks the whole page every time, until
+      // another video plays or a speed is chosen
+      this.#stopTimer("applySpeed")
+      return
     }
+    if (this.video.playbackRate !== this.speed) this.video.playbackRate = this.speed
   }
 
   seek(seconds) {
