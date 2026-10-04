@@ -40,11 +40,17 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 // "1.25" and "2" instead of "1.2500000000000002" and "2.00"
 const formatSpeed = speed => `${Math.round(speed * 100) / 100}`
 
-// whether keystrokes belong to a text field and should never be hijacked
-const isTyping = target =>
-  target instanceof HTMLElement &&
-  (target.isContentEditable ||
-    ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+// Whether keystrokes belong to a text field and should never be hijacked. A
+// key typed in a field inside an (open) shadow root reaches the document with
+// the shadow host as its target, so look at where it really started.
+const isTyping = event => {
+  const target = event.composedPath()[0]
+  return (
+    target instanceof HTMLElement &&
+    (target.isContentEditable ||
+      ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+  )
+}
 
 // seeking by setting currentTime breaks the netflix player, so its own seek
 // shortcuts are left alone
@@ -203,7 +209,7 @@ class SpeedyVideo {
   }
 
   #onKeydown = event => {
-    if (isTyping(event.target) || event.altKey || event.metaKey) return
+    if (isTyping(event) || event.altKey || event.metaKey) return
     const action = this.#actionFor(event)
     if (!action) return
     // with no video on screen (e.g. a chat with the video viewer closed) the
