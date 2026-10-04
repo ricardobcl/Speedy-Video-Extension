@@ -14,7 +14,25 @@
   </header>
 
   <main>
+    <div class="welcome" id="welcome" hidden>
+      <h2>Welcome to Speedy Video</h2>
+      <p>Speedy Video runs only on the sites you turn it on for. Turn on the
+      usual video sites or all sites below, or one site at a time from the
+      Speedy Video icon in the toolbar.</p>
+    </div>
+
     <p class="intro">Changes are saved right away, and apply to open tabs too.</p>
+
+    <section>
+      <h2>Sites</h2>
+      <p class="hint">On any other site, click the Speedy Video icon in the toolbar to turn it on there.</p>
+      <div id="sites"></div>
+      <div class="buttons">
+        <button type="button" class="secondary" id="usualSites"
+          title="Youtube, Netflix, Disney+, HBO Max, Prime Video, Instagram, X, Patreon, WhatsApp and NOS TV">Turn on the usual video sites</button>
+        <button type="button" class="secondary" id="allSites">Turn on for all sites</button>
+      </div>
+    </section>
 
     <section>
       <h2>Speed</h2>
@@ -97,6 +115,7 @@
     </footer>
   </main>
 
+  <script src="sites.js"></script>
   <script src="settings.js"></script>
   <script src="options.js"></script>
 </body>

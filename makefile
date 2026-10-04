@@ -40,12 +40,23 @@ install: chrome
 	@ echo ""
 	@ echo "To update later: git pull && make install, then click reload on the extension card."
 
+# The content script is these files joined into content.js, inside a block
+# that only runs if the page has no copy running yet: a page can get it twice
+# (Safari also injects it into open tabs on its own), and the second copy
+# would fail on its redeclared constants, or run alongside the first.
+CONTENT_SCRIPT = sites.js settings.js speedy.js
+
 # the Chrome extension folder is src/ plus the icons, rebuilt from scratch so
 # that nothing deleted from src/ lingers in it
 chrome: clean_chrome
 	@ echo "> Building the Chrome extension folder..."
 	@ mkdir -p "$(CHROME)/icons"
 	@ cp src/* "$(CHROME)"
+	@ rm "$(CHROME)/speedy.js"
+	@ { echo "// built by make from $(CONTENT_SCRIPT); edit those"; \
+	    echo "if (!globalThis.speedyVideo) {"; \
+	    for file in $(CONTENT_SCRIPT); do cat "src/$$file"; done; \
+	    echo "}"; } > "$(CHROME)/content.js"
 	@ cp icons/*.png "$(CHROME)/icons"
 	@ echo "$(GREEN)Chrome extension is ready!$(PLAIN)"
 

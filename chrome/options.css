@@ -7,6 +7,7 @@
   --border: #dcdce0;
   --field: #f5f5f7;
   --accent: #d93a1a;
+  --on-accent: #ffffff;
   --error: #c4141b;
 }
 
@@ -19,6 +20,7 @@
     --border: #3a3a3e;
     --field: #19191b;
     --accent: #ff7a57;
+    --on-accent: #1d1d1f;
     --error: #ff6b6b;
   }
 }
@@ -62,6 +64,30 @@ h1 {
 }
 
 .intro {
+  color: var(--muted);
+}
+
+.welcome {
+  margin: 16px 0;
+  padding: 2px 20px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.welcome h2 {
+  color: inherit;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.empty {
+  margin: 8px 0;
   color: var(--muted);
 }
 

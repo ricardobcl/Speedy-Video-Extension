@@ -1,4 +1,136 @@
-/* global defaultSettings, readSettings */
+// built by make from sites.js settings.js speedy.js; edit those
+if (!globalThis.speedyVideo) {
+/* exported ALL_SITES, usualSites, sitePattern, siteName, patternMatches, isAllowed */
+/* exported readSites, turnBackOn, turnOff */
+
+// Where Speedy Video runs. A site is on when the user granted the extension
+// access to it (an optional host permission, asked for from the toolbar popup
+// or the options page) and it isn't in the list of sites turned off while
+// "all sites" is granted, which is kept in storage.local, since a single site
+// can't be taken out of an all-sites permission. Chrome and Safari keep the
+// granted permissions, so the user's list of sites is chrome.permissions
+// itself. Loaded by the background script, the popup, the options page and,
+// before the content script, every page it runs in.
+
+const ALL_SITES = "*://*/*"
+
+// the sites the extension ran on before 4.x asked first, which the options page
+// offers to turn on in one go
+const usualSites = [
+  "*://*.youtube.com/*",
+  "*://*.youtube-nocookie.com/*",
+  "*://*.netflix.com/*",
+  "*://*.nostv.pt/*",
+  "*://*.disneyplus.com/*",
+  "*://*.hbomax.com/*",
+  "*://*.primevideo.com/*",
+  "*://*.instagram.com/*",
+  "*://*.x.com/*",
+  "*://*.twitter.com/*",
+  "*://*.patreon.com/*",
+  "*://*.web.whatsapp.com/*"
+]
+
+// The match pattern for the site of `url` (its host without "www.", and its
+// subdomains: https://www.youtube.com/watch -> *://*.youtube.com/*), or
+// undefined for pages that aren't websites (chrome://, file://...)
+const sitePattern = url => {
+  const { protocol, hostname } = new URL(url)
+  if (protocol !== "http:" && protocol !== "https:") return undefined
+  const isIp = /^[\d.]+$/.test(hostname) || hostname.startsWith("[")
+  return isIp ? `*://${hostname}/*` : `*://*.${hostname.replace(/^www\./, "")}/*`
+}
+
+// "youtube.com" for *://*.youtube.com/*, "all sites" for *://*/*
+const siteName = pattern => {
+  const host = /^[^:]+:\/\/([^/]*)/.exec(pattern)?.[1] ?? pattern
+  return host === "*" || pattern === "<all_urls>" ? "all sites" : host.replace(/^\*\./, "")
+}
+
+const escapeRegExp = text => text.replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+
+// Whether `url` matches a match pattern (developer.chrome.com/docs/extensions/
+// develop/concepts/match-patterns): ours, and whatever else the browser may
+// have granted, e.g. from Safari's own "Always Allow on This Website"
+const patternMatches = (pattern, url) => {
+  if (pattern === "<all_urls>") return /^(https?|wss?|ftp|file):/.test(url)
+  const [, scheme, host, path] = /^(\*|[a-z-]+):\/\/([^/]*)(\/.*)$/.exec(pattern) ?? []
+  if (!scheme) return false
+  const schemes = scheme === "*" ? "https?" : escapeRegExp(scheme)
+  const hosts =
+    host === "*"
+      ? "[^/]*"
+      : host.startsWith("*.")
+        ? `([^/]*\\.)?${escapeRegExp(host.slice(2))}`
+        : escapeRegExp(host)
+  const paths = escapeRegExp(path).replaceAll("*", ".*")
+  return new RegExp(`^${schemes}://${hosts}(:\\d+)?${paths}$`).test(url.split("#")[0])
+}
+
+// whether Speedy Video should run on `url`, given the granted `origins` and
+// the sites turned off
+const isAllowed = (url, { origins, excluded }) =>
+  origins.some(origin => patternMatches(origin, url)) &&
+  !excluded.some(pattern => patternMatches(pattern, url))
+
+// { origins, excluded }: the granted sites and the ones turned off
+const readSites = async () => {
+  const [{ origins = [] }, { excludedSites = [] }] = await Promise.all([
+    chrome.permissions.getAll(),
+    chrome.storage.local.get("excludedSites")
+  ])
+  return { origins, excluded: excludedSites }
+}
+
+const setExcluded = excludedSites => chrome.storage.local.set({ excludedSites })
+
+// turns a site turned off while "all sites" is granted back on
+const turnBackOn = async url => {
+  const { excluded } = await readSites()
+  await setExcluded(excluded.filter(pattern => !patternMatches(pattern, url)))
+}
+
+// Turns Speedy Video off on the site of `url`: gives back the permissions that
+// cover it (other than all sites), and with all sites granted, also turns the
+// site off in the list
+const turnOff = async url => {
+  const { origins, excluded } = await readSites()
+  const covering = origins.filter(
+    origin => origin !== ALL_SITES && patternMatches(origin, url)
+  )
+  if (covering.length > 0) await chrome.permissions.remove({ origins: covering })
+  const stillCovered = origins.some(
+    origin => !covering.includes(origin) && patternMatches(origin, url)
+  )
+  const pattern = sitePattern(url)
+  if (stillCovered && !excluded.includes(pattern)) await setExcluded([...excluded, pattern])
+}
+/* exported defaultSettings, readSettings */
+
+// The settings that can be changed on the options page, and their defaults.
+// Loaded both before the content script and by the options page, which keeps
+// the changed ones in chrome.storage.sync (validated before they are saved).
+const defaultSettings = Object.freeze({
+  speedDelta: 0.25, // smallest increment or decrement of playback speed
+  minSpeed: 0.2, // lowest playback speed allowed
+  maxSpeed: 4.0, // highest playback speed allowed
+  speedPresets: { a: 1.0, s: 2.0, d: 3.0 }, // key -> playback speed
+  skipSmall: 2, // seconds seeked by shift + left/right
+  skipBig: 10, // seconds seeked by shift + up/down
+  fasterKey: "w", // key that speeds up by speedDelta
+  slowerKey: "q", // key that slows down by speedDelta
+  overlayKey: "z", // key that shows the current speed on top of the video
+  overlayDuration: 1000 // ms the speed overlay stays visible
+})
+
+// The settings in effect: the saved ones, and the defaults for the rest. Not
+// chrome.storage.sync.get(defaultSettings), because Chrome merges nested
+// defaults into the saved value, which would bring back removed presets.
+const readSettings = async () => ({
+  ...structuredClone(defaultSettings),
+  ...(await chrome.storage.sync.get(Object.keys(defaultSettings)))
+})
+/* global defaultSettings, readSettings, isAllowed */
 
 /**
  * Speedy Video: fine-grained playback speed control for HTML5 videos.
@@ -11,7 +143,10 @@
  * on another site) work too, once they have the keyboard focus. Videos that
  * appear later, without a page change (e.g. the viewer on Whatsapp), are
  * picked up when they start playing. The shortcuts and speeds come from the
- * options page (settings.js, loaded before this script, has the defaults).
+ * options page (settings.js has the defaults). The background script runs it
+ * on the sites that are on (sites.js), and stops it when they are turned off.
+ * make joins sites.js, settings.js and this file into the content.js that
+ * runs in pages.
  */
 
 // -------------------------------------------------------------- configuration
@@ -94,14 +229,33 @@ class SpeedyVideo {
   #currentUrl = location.href
   #timers = new Map() // active setInterval handles, keyed by name
   #overlayTimeout = undefined
+  #listeners = undefined // aborts the page's event listeners; set while running
+
+  get running() {
+    return this.#listeners !== undefined
+  }
 
   start() {
+    if (this.running) return
     log("Starting Speedy Video")
-    this.#loadSettings()
+    this.#listeners = new AbortController()
     this.#watchUrlChanges()
     this.#watchPlayback()
     this.#setupShortcuts()
     this.#keepSpeedApplied() // in case a video is already playing
+  }
+
+  // leaves the page alone again (its site was turned off, or the extension
+  // updated or removed): no more listeners, timers or overlay; the video keeps
+  // the speed it has
+  stop() {
+    if (!this.running) return
+    log("Stopping Speedy Video")
+    this.#listeners.abort()
+    this.#listeners = undefined
+    for (const name of [...this.#timers.keys()]) this.#stopTimer(name)
+    clearTimeout(this.#overlayTimeout)
+    document.getElementById("speedy-overlay")?.remove()
   }
 
   // sets a new playback speed, clamped to [minSpeed, maxSpeed] and rounded to
@@ -128,6 +282,7 @@ class SpeedyVideo {
   // second, because the playing video changes without a page change in feeds
   // and stories, and some players reset the rate on their own
   applySpeed = () => {
+    if (this.#orphaned()) return
     this.video = findVideo()
     if (!this.video) {
       // the video is gone (e.g. whatsapp's viewer was closed): stop checking,
@@ -169,22 +324,13 @@ class SpeedyVideo {
     )
   }
 
-  // ----------------------------------------------------------------- settings
-
-  // The settings changed on the options page replace the defaults as soon as
-  // they are read, and again whenever they change, so that open tabs pick up
-  // the changes without a reload. Until then (a few ms) the defaults apply.
-  #loadSettings() {
-    readSettings()
-      .then(settings => Object.assign(config, settings))
-      .catch(error => log(`Could not read the settings: ${error}`))
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area !== "sync") return
-      for (const [name, { newValue }] of Object.entries(changes)) {
-        // no newValue means it was reset to the default
-        if (name in defaultSettings) config[name] = newValue ?? defaultSettings[name]
-      }
-    })
+  // After the extension is updated, reloaded or removed, this copy stays in
+  // the page, cut off from it, and an update injects a new copy. So it bows
+  // out the first time it notices, before it handles anything.
+  #orphaned() {
+    if (chrome.runtime?.id) return false
+    this.stop()
+    return true
   }
 
   // ------------------------------------------------ keeping the speed applied
@@ -199,9 +345,11 @@ class SpeedyVideo {
       this.#keepSpeedApplied()
     }
     if (window.navigation) {
-      window.navigation.addEventListener("currententrychange", onChange)
+      window.navigation.addEventListener("currententrychange", onChange, {
+        signal: this.#listeners.signal
+      })
     } else {
-      setInterval(onChange, config.pollInterval) // e.g. safari < 18.2
+      this.#startTimer("watchUrl", onChange, config.pollInterval) // e.g. safari < 18.2
     }
   }
 
@@ -210,7 +358,10 @@ class SpeedyVideo {
   // so a video starting to play is the other cue to set up; `play` does not
   // bubble, but the capture phase still sees it here
   #watchPlayback() {
-    document.addEventListener("play", () => this.#keepSpeedApplied(), true)
+    document.addEventListener("play", () => this.#keepSpeedApplied(), {
+      capture: true,
+      signal: this.#listeners.signal
+    })
   }
 
   // Keeps the chosen speed applied to whatever is playing. Nothing needs
@@ -230,11 +381,14 @@ class SpeedyVideo {
 
   // capture phase, so that we run before the site's own handlers
   #setupShortcuts() {
-    document.addEventListener("keydown", this.#onKeydown, true)
+    document.addEventListener("keydown", this.#onKeydown, {
+      capture: true,
+      signal: this.#listeners.signal
+    })
   }
 
   #onKeydown = event => {
-    if (isTyping(event) || event.altKey || event.metaKey) return
+    if (this.#orphaned() || isTyping(event) || event.altKey || event.metaKey) return
     const action = this.#actionFor(event)
     if (!action) return
     // with no video on screen (e.g. a chat with the video viewer closed) the
@@ -287,4 +441,37 @@ class SpeedyVideo {
   }
 }
 
-new SpeedyVideo().start()
+// ------------------------------------------------------------------- starting
+
+// The settings changed on the options page replace the defaults as soon as
+// they are read, and again whenever they change, so that open tabs pick up the
+// changes without a reload. Until then (a few ms) the defaults apply.
+const watchSettings = () => {
+  readSettings()
+    .then(settings => Object.assign(config, settings))
+    .catch(error => log(`Could not read the settings: ${error}`))
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "sync") return
+    for (const [name, { newValue }] of Object.entries(changes)) {
+      // no newValue means it was reset to the default
+      if (name in defaultSettings) config[name] = newValue ?? defaultSettings[name]
+    }
+  })
+}
+
+// The background script injects the content script into the open tabs of a
+// site that is turned on, but only into frames that don't have it yet, which
+// is what globalThis.speedyVideo tells it. It can still arrive twice (Safari
+// injects it into open tabs too), so the content.js that make builds only
+// runs when globalThis.speedyVideo isn't there yet.
+const speedy = new SpeedyVideo()
+globalThis.speedyVideo = speedy
+watchSettings()
+// the background script tells every tab when the sites that are on change
+chrome.runtime.onMessage.addListener(message => {
+  if (message.type !== "sites") return
+  if (isAllowed(location.href, message)) speedy.start()
+  else speedy.stop()
+})
+speedy.start()
+}

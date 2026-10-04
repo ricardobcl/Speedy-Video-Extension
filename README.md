@@ -12,13 +12,14 @@ Manifest V3 · Chrome &amp; Safari · one-command install</p>
 </p>
 
 A tiny browser extension for fine-grained control over the playback speed of
-HTML5 videos on Youtube (Shorts included), Netflix, Instagram, X, Patreon, WhatsApp and
-other whitelisted websites: keyboard shortcuts, plus an overlay that shows the speed
-whenever it changes — and that overlay is the only thing it adds to the page.
+HTML5 videos on Youtube (Shorts included), Netflix, Instagram, X, Patreon, WhatsApp
+or any other website you turn it on for: keyboard shortcuts, plus an overlay that
+shows the speed whenever it changes — and that overlay is the only thing it adds
+to the page.
 
 It is a small [Manifest V3](https://developer.chrome.com/docs/extensions/develop/migrate)
-content-script extension: no background page, no network access and no
-permissions beyond the whitelisted websites and storage for your settings.
+extension: no network access, and access only to the websites you turn it on
+for, which it asks for one site at a time (or all at once, if you prefer).
 Local installation only, for now.
 Last tested on Youtube with Chrome 152 and Safari 26.6.
 
@@ -74,7 +75,9 @@ and unzip it (the extension comes pre-built). Then:
 1. Go to [chrome://extensions](chrome://extensions) and turn on **Developer mode** (top right corner)
 2. Click **Load unpacked** and choose the `chrome` folder
 
-Done — open a Youtube video.
+Done — its options page opens: turn on the usual video sites there, or open
+a video site and turn it on from the extension's toolbar icon (see
+[Sites](#sites)).
 
 **With git** (easier to update later):
 
@@ -114,10 +117,8 @@ can download it too). Then:
    project (in the git-ignored `safari/` folder), signs and builds the small
    wrapper app and opens it, which registers the extension with Safari.
 3. In Safari → Settings → Extensions, turn on **Speedy Video**
-4. Open a Youtube video, click the extension's icon in the toolbar and choose
-   **Always Allow on Every Website** — Safari asks for permission per website
-   even for the whitelisted ones, and the extension does nothing until you
-   grant it (it still only runs on the whitelisted websites)
+4. Open a video site, click the extension's icon in the toolbar and turn it on
+   for the site (see [Sites](#sites)); Safari asks you to confirm
 
 **NOTES**:
 
@@ -130,14 +131,37 @@ can download it too). Then:
   resets every time Safari quits, so signing is worth the one-time setup.
 - Publishing the extension (App Store or notarized) would additionally
   require the paid Apple Developer Program.
+- It needs Safari 26 or later: older versions ignore the list of sites turned
+  off while all sites are on.
+- Safari has its own say on which websites an extension may access: choosing
+  **Always Allow on Every Website** in Safari's prompt also turns Speedy Video
+  on for all sites, and turning all sites off in Speedy Video also turns off
+  the sites you had turned on one by one. Settings are not synced across
+  devices in Safari.
 
-## 🌐 Supported websites
+<a id="sites"></a>
 
-By default the extension runs on:
+## 🌐 Sites
+
+Speedy Video only runs on the sites you turn it on for. On a video site, click
+its icon in the toolbar and choose **Turn on for youtube.com** (or **Turn on
+for all sites**); the browser asks you to confirm, and it starts working in
+the open tabs right away, no reload needed. The same popup turns it off again.
+
+- A site includes its subdomains: turning on `youtube.com` also covers
+  `music.youtube.com`.
+- With **all sites** on, you can still turn it off on single sites; the
+  popup turns them back on.
+- The options page lists the sites it runs on (and the ones turned off), with
+  buttons to remove them, to turn on all sites, or to turn on the usual video
+  sites in one go: Youtube, Netflix, Disney+, HBO Max, Prime Video, Instagram,
+  X, Patreon, WhatsApp and NOS TV.
+
+These are the sites it has been tried on:
 
 | Website        | Notes                                                              |
 | -------------- | ------------------------------------------------------------------ |
-| Youtube        | regular videos and Shorts; covered by automated checks             |
+| Youtube        | regular videos and Shorts                                          |
 | Netflix        | the seek shortcuts are left to Netflix's own                       |
 | NOS TV         | `nostv.pt` (live TV and on-demand)                                 |
 | Disney+        | `disneyplus.com`                                                   |
@@ -147,15 +171,14 @@ By default the extension runs on:
 | X              | `x.com` and `twitter.com`                                          |
 | Patreon        | Patreon's own player and embedded Youtube videos                   |
 | WhatsApp       | videos opened in the viewer of `web.whatsapp.com`                  |
-| Youtube embeds | on any website (`youtube.com` and `youtube-nocookie.com` embeds): click the embedded player first, so it has focus |
+| Youtube embeds | on any website, once `youtube.com` and `youtube-nocookie.com` are on (the usual video sites include both): click the embedded player first, so it has focus |
 
 It works on any HTML5 `<video>`, also inside shadow DOM: it controls the video
 that is playing (the largest one, if several are), so it follows you through
 feeds, reels, stories and Shorts, and keeps the speed you chose across videos
 until you change it. Videos that show up later, e.g. opened in a viewer, are
 picked up when they start playing. It also runs inside frames, which is how
-embedded Youtube players work. To run it on another website, add it to the
-whitelist (see [Website Whitelist](#-website-whitelist)).
+embedded Youtube players work.
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -195,12 +218,13 @@ not these amounts.
 
 ## ⚙️ Options
 
-The options page changes the shortcuts and speeds; changes are saved right
-away and apply to open tabs too, no reload needed. Open it by right-clicking
+The options page changes the sites, shortcuts and speeds; changes are saved
+right away and apply to open tabs too, no reload needed. Open it by right-clicking
 the extension's toolbar icon → **Options**, or from its card in
 `chrome://extensions` → **Details** → **Extension options**. In Safari:
 Settings → Extensions → Speedy Video → **Settings**.
 
+- **Sites**: the sites it runs on (see [Sites](#sites))
 - **Speed**: the step for speeding up and slowing down (0.05x to 1x), and the
   slowest and fastest speeds
 - **Shortcuts**: the speed up, slow down and show-the-speed keys, and the
@@ -213,23 +237,22 @@ Settings → Extensions → Speedy Video → **Settings**.
 Settings are kept in the browser's synced extension storage, so they follow
 your Chrome profile. The defaults live in `src/settings.js`.
 
-## 🌐 Website Whitelist
-
-The extension only runs on explicitly allowed websites. By default it comes
-with Youtube, Netflix, NOS TV, Disney+, HBO Max, Prime Video, Instagram, X,
-Patreon and WhatsApp, but you can change which pages this extension runs by
-changing `content_scripts` -> `matches` in `src/manifest.json` (see
-[google's content script docs](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts)
-for more information). After changing it, run `make` and click the reload
-icon on the extension's card in `chrome://extensions`, or run `make safari`
-again.
-
 ## 🛠️ Development
 
 The source lives in `src/`; `make` copies it into the Chrome extension
 folder, which is committed so that the ZIP download comes pre-built. The
 Safari Xcode project is generated from the Chrome folder, so it always picks
 up the latest build.
+
+- `speedy.js` — the content script: shortcuts, overlay, keeping the speed
+  (`make` joins `sites.js`, `settings.js` and it into `content.js`, the
+  file that runs in pages)
+- `settings.js` — the settings and their defaults
+- `sites.js` — which sites it runs on (the granted permissions, minus the
+  sites turned off)
+- `background.js` — registers the content script for those sites and starts
+  or stops it in open tabs when they change
+- `popup.*` and `options.*` — the toolbar popup and the options page
 
 ```Shell
 > npm install   # once, installs ESLint

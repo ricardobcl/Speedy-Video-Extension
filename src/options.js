@@ -1,4 +1,4 @@
-/* global defaultSettings, readSettings */
+/* global ALL_SITES, defaultSettings, readSettings, readSites, siteName, usualSites */
 
 // The options page: shows the settings, checks every change and saves it in
 // chrome.storage.sync, where the content script in every open tab picks it up
@@ -203,6 +203,52 @@ const presetRow = preset => {
 
 const renderPresets = () => element("presets").replaceChildren(...presets.map(presetRow))
 
+// ----------------------------------------------------------------- sites
+
+// a row of the sites list: the site's name and a button
+const siteRow = (text, buttonLabel, onClick) => {
+  const row = document.createElement("div")
+  row.className = "row"
+  const remove = Object.assign(document.createElement("button"), {
+    type: "button",
+    className: "text-button",
+    textContent: buttonLabel
+  })
+  remove.addEventListener("click", onClick)
+  row.append(Object.assign(document.createElement("span"), { textContent: text }), remove)
+  return row
+}
+
+const removeOrigin = origin => chrome.permissions.remove({ origins: [origin] })
+
+// The sites it runs on: with all sites on, the ones turned off; otherwise the
+// ones turned on. Rendered again whenever they change, also from the popup.
+const renderSites = async () => {
+  const { origins, excluded } = await readSites()
+  const allSites = origins.includes(ALL_SITES)
+  const rows = []
+  if (allSites) {
+    rows.push(siteRow("All sites", "Turn off", () => removeOrigin(ALL_SITES)))
+    for (const pattern of excluded) {
+      const turnBackOn = () =>
+        chrome.storage.local.set({ excludedSites: excluded.filter(other => other !== pattern) })
+      rows.push(siteRow(`Turned off on ${siteName(pattern)}`, "Turn back on", turnBackOn))
+    }
+  } else {
+    for (const origin of [...origins].sort((a, b) => siteName(a).localeCompare(siteName(b)))) {
+      rows.push(siteRow(siteName(origin), "Remove", () => removeOrigin(origin)))
+    }
+  }
+  if (rows.length === 0) {
+    const empty = Object.assign(document.createElement("p"), { className: "empty" })
+    empty.textContent = "No sites yet."
+    rows.push(empty)
+  }
+  element("sites").replaceChildren(...rows)
+  element("allSites").hidden = allSites
+  element("usualSites").hidden = allSites || usualSites.every(site => origins.includes(site))
+}
+
 // ------------------------------------------------------------------ page
 
 const render = () => {
@@ -226,6 +272,21 @@ const render = () => {
 }
 
 const start = async () => {
+  element("welcome").hidden = !new URLSearchParams(location.search).has("welcome")
+  renderSites()
+  chrome.permissions.onAdded.addListener(renderSites)
+  chrome.permissions.onRemoved.addListener(renderSites)
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.excludedSites) renderSites()
+  })
+  // asking for a permission must be the first thing a click does
+  element("usualSites").addEventListener("click", () =>
+    chrome.permissions.request({ origins: usualSites })
+  )
+  element("allSites").addEventListener("click", () =>
+    chrome.permissions.request({ origins: [ALL_SITES] })
+  )
+
   settings = await readSettings()
   render()
 

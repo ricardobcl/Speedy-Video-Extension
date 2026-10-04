@@ -17,5 +17,11 @@ export default [
       sourceType: "script",
       globals: { ...globals.browser, ...globals.webextensions }
     }
+  },
+  {
+    files: ["src/background.js"],
+    languageOptions: {
+      globals: { ...globals.serviceworker, ...globals.webextensions }
+    }
   }
 ]
