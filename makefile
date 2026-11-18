@@ -65,7 +65,9 @@ chrome: clean_chrome
 # Safari. Requires the full Xcode app (free on the App Store).
 # (The perl step fixes a converter bug: it derives the app's bundle id from
 # the app name instead of using the given one, so the extension's id is not
-# prefixed by the app's and Xcode refuses to run it.)
+# prefixed by the app's and Xcode refuses to run it. Newer Xcodes write the
+# project as a JSON-like project.xcproj instead of project.pbxproj, so it
+# handles both.)
 safari: chrome
 	@ xcrun --find safari-web-extension-converter >/dev/null 2>&1 || { \
 	  echo "$(BOLD)Xcode is required to build the Safari extension:$(PLAIN)"; \
@@ -79,8 +81,9 @@ safari: chrome
 	    --project-location "$(SAFARI)" --app-name "$(APP)" \
 	    --bundle-identifier $(BUNDLE_ID) \
 	    --macos-only --no-open --no-prompt --force >/dev/null
-	@ perl -pi -e 's/PRODUCT_BUNDLE_IDENTIFIER = .*;/PRODUCT_BUNDLE_IDENTIFIER = $(BUNDLE_ID);/ unless /\.Extension;/' \
-	    "$(SAFARI)/$(APP)/$(APP).xcodeproj/project.pbxproj"
+	@ perl -pi -e '$$n += s/(PRODUCT_BUNDLE_IDENTIFIER"?\s*[=:]\s*"?)[\w.-]+/$${1}$(BUNDLE_ID)/ unless /\.Extension\b/; END { $$? = 1 unless $$n }' \
+	    "$(SAFARI)/$(APP)/$(APP).xcodeproj/"project.*proj \
+	  || { echo "$(BOLD)Could not set the app's bundle id in the Xcode project$(PLAIN)"; exit 1; }
 	@ echo "> Building the Safari extension app (takes a minute the first time)..."
 	@ xcodebuild -project "$(SAFARI)/$(APP)/$(APP).xcodeproj" -scheme "$(APP)" \
 	    -configuration Debug -destination "generic/platform=macOS" -derivedDataPath "$(SAFARI)/build" \
