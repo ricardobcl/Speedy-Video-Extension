@@ -281,12 +281,13 @@ const start = async () => {
     if (area === "local" && changes.excludedSites) renderSites()
   })
   // asking for a permission must be the first thing a click does
-  element("usualSites").addEventListener("click", () =>
-    chrome.permissions.request({ origins: usualSites })
-  )
-  element("allSites").addEventListener("click", () =>
-    chrome.permissions.request({ origins: [ALL_SITES] })
-  )
+  const turnOn = origins => () =>
+    chrome.permissions.request({ origins }).then(
+      granted => showStatus(granted ? "Turned on" : "Not turned on: the browser didn't allow it"),
+      error => showStatus(`Not turned on: ${error.message}`)
+    )
+  element("usualSites").addEventListener("click", turnOn(usualSites))
+  element("allSites").addEventListener("click", turnOn([ALL_SITES]))
 
   settings = await readSettings()
   render()
